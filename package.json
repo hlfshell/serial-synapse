@@ -1,0 +1,11 @@
+{
+  "name": "synapse-cmder",
+  "version": "1.0.0",
+  "description": "Orchestrates serial communication to MCU device utilizing CmdMessenger style communication",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Keith Chester",
+  "license": "MIT"
+}
