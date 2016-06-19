@@ -6,6 +6,6 @@ Let's say that you want a quick and easy control mechanism for your custom hardw
 
 
 # TODO:
-1 - test!
-2 - test some more!
-3 - write an actual doc for this project
+1 - Tests should be written to ensure that this module works as required
+
+2 - Better documentation
