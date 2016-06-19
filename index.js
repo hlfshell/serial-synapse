@@ -163,7 +163,7 @@ class Synapse {
         //Form up all the of the passed arguments into the proper format
         var output = "";
         output += self._commands[fncName].identifier;
-		output += "," + executingFnc.uuid;
+		if(!self._commands[fncName].silent) output += "," + executingFnc.uuid;
         args.forEach( (arg)=> output += "," + arg );
         output += ";";
 		
