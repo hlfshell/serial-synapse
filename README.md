@@ -181,6 +181,8 @@ setInterval(function(){
 
 ```
 
+# Socket Connection
+As a work in progress, I am also developing a socket wrapper which will immediately expose your synapse commands and update handlers to a socket connection. AKA 3 extra lines of code will bring your device online! It can be seen [here](https://github.com/hlfshell/synapse-serial-socket).
 
 
 # TODO:
