@@ -103,7 +103,7 @@ class Synapse {
 		if(!opts.identifier) throw new Error("An identifier (an enum that lets the MCU let synapse know which update function is replying) must be specified");
         else {
             Object.keys(self._updateHandlers).forEach(function(fncName){
-               if(self._updateHandlers.indexOf(opts.name).identifier == opts.identifier) throw new Error("This fnc Identifier was already used by " + fncName); 
+               if(self._updateHandlers[opts.identifier]) throw new Error("This fnc Identifier was already used by " + fncName); 
             });
         }
 		
