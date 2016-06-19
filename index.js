@@ -44,7 +44,7 @@ class Synapse {
         if(!opts.returns) opts.returns = [];
         
 		//Iterate over the already created react functions and make sure that none of them have the same identifier
-        if(!opts.identifier || opts.identifier === 0) throw new Error("An identifier (an enum that tells the MCU which function you are executing) must be specified");
+        if(!opts.identifier && opts.identifier === 0) throw new Error("An identifier (an enum that tells the MCU which function you are executing) must be specified");
         else {
             Object.keys(self._commands).forEach(function(fncName){
                if(self._commands[fncName].identifier == opts.identifier) throw new Error("This fnc Identifier was already used by " + fncName); 
@@ -79,7 +79,7 @@ class Synapse {
         if(!opts.then || typeof opts.then != "function") throw new Error("then must be a function");
 		
 		//Iterate over the already created update handlers and make sure that none of them have the same identifier
-		if(!opts.identifier || opts.identifier === 0) throw new Error("An identifier (an enum that lets the MCU let synapse know which update function is replying) must be specified");
+		if(!opts.identifier && opts.identifier === 0) throw new Error("An identifier (an enum that lets the MCU let synapse know which update function is replying) must be specified");
         else {
             Object.keys(self._updateHandlers).forEach(function(fncName){
                if(self._updateHandlers[opts.identifier]) throw new Error("This fnc Identifier was already used by " + fncName); 
