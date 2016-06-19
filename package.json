@@ -1,5 +1,5 @@
 {
-  "name": "synapse-cmder",
+  "name": "serial-synapse",
   "version": "0.0.1",
   "description": "Orchestrates serial communication to MCU device utilizing CmdMessenger style communication",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "author": {
 	  "name": "Keith Chester",
-	  "email" "kchester@gmail.com"
+	  "email": "kchester@gmail.com"
   },
   "license": "MIT"
 }
