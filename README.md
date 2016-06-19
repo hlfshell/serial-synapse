@@ -72,7 +72,7 @@ synapse.commandName(argument1, argument2, function(err, [data, rawMsg]){
 The callback for responsive commands gets the following arguments:
 
 * *err* - An error, if it occured. If the *timeout* is above 0 and *timeoutFnc* is NOT set, this will also be set to "Time out occured" upon a timeout.
-* *data* - optional unless you have data coming back - An object with the return data, as specified by returns. For example - if the returns on the command instantiation was set to ["abc", "xyz", "kjh"], and we receive a serial message of *"uuid,100,127,255"* then the return object would look like
+* *data* - optional unless you have data coming back - An object with the return data, as specified by returns. For example - if the returns on the command instantiation was set to **["abc", "xyz", "kjh"]**, and we receive a serial message of *"uuid,100,127,255"* then the return object is automagically formatted for us, and would look like
 ```
 {
 	abc: 100,
