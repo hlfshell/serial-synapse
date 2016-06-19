@@ -1,4 +1,4 @@
-# synapse-cmder
+# serial-synapse
 Orchestrates serial communication to MCU device utilizing CmdMessenger style communication
 
 # Why use this?
