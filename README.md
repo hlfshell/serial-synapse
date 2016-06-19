@@ -32,7 +32,7 @@ For example:
 0,dfegjk,25,47,13;
 ```
 
-###From secondary to MCU:
+###From secondary to master:
 ```
 identifier/uuid,data,data,data
 ```
