@@ -213,8 +213,16 @@ setInterval(function(){
 ```
 
 # Socket Connection
-As a work in progress, I am also developing a socket wrapper which will immediately expose your synapse commands and update handlers to a socket connection. AKA 3 extra lines of code will bring your device online! It can be seen [here](https://github.com/hlfshell/synapse-serial-socket).
-
+As a work in progress, I am also developing a socket wrapper which will immediately expose your synapse commands and update handlers to a socket connection. AKA 3 extra lines of code will bring your device online! It can be seen [here](https://github.com/hlfshell/serial-synapse-socket). Here is an example on how easy it is to expose a synapse object to the internet:
+```
+//Assuming you've already created a serial-synapse object called synapse
+var SynapseServer = require('serial-synapse-socket');
+var server = new SynapseServer({
+	port: 8080,
+	synapse: synapse
+});
+```
+And that's it!
 
 # TODO:
 1 - Tests should be written to ensure that this module works as required
