@@ -85,6 +85,37 @@ The callback for responsive commands gets the following arguments:
 ##Silent Commands
 Silent commands are constructed the same way as responsive commands, but don't have a callback. They have no timeout, and there is no data returned from them. Use this when you don't expect a response. To make a silent command, set *silent* to true.
 
+#Update Handlers
+Update handlers are functions that are triggered when we need to allow the MCU to alert us to a change/value without being polled for it.
+
+An update handler is created by doing
+```
+synapse.addUpdateHandler(opts);
+```
+WHERE opts is
+```
+{
+	name: 'updateHandlerName',
+	identifier: #,
+	returns: [],
+	then: function(){ ... }
+}
+```
+* **name** - required. Must not start with _, must be unique, and it is compared to a list of reserved names/words. Must follow the same rules as a javascript function.
+* **identifier** - required - the enum you told the MCU to report when broadcasting. Make sure it does NOT match any of the enums from the commands for simplicity's sake.
+* **returns** - optional - default [] - the order of, and label of, returning data.
+* **then** - required - a function that is described as follows:
+```
+then: function([data, rawMsg]){
+	//do stuff
+}
+```
+* *data* - optional, defaults to {} - parsed data as per the returns (same as how return and data works for commands).
+* *rawMsg* - optional - the raw msg passed that triggered the update handler
+
+Note that you cannot trigger an updateHandler after creation - it can only be triggered by the secondary.
+
+
 ##Example Usage:
 In this simple example, we're going to set up CmdMessenger on an Arduino (I'm assuming an Uno) - and placing a button on pin 4. The Uno has an LED already on pin 13. We're going to have node blink the LED every second, reporting back once it's done. We're also going to have a console log of when the button switches states.
 
