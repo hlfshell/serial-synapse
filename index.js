@@ -7,10 +7,8 @@ class Synapse {
              
         this._conn = opts.connection;
         
-        this._reactFncs = {};
+        this._commands = {};
         this._waitingResponse = {};
-        
-        this._silentFncs = {};
         
         this._updateHandlers = {};
         
@@ -33,7 +31,7 @@ class Synapse {
         this._setListeners();
     }
 	
-	addReactFnc(opts){
+	addCommand(opts){
         var self = this;
         
         //Validators
@@ -48,44 +46,25 @@ class Synapse {
 		//Iterate over the already created react functions and make sure that none of them have the same identifier
         if(!opts.identifier) throw new Error("An identifier (an enum that tells the MCU which function you are executing) must be specified");
         else {
-            Object.keys(self._reactFncs).forEach(function(fncName){
-               if(self._reactFncs[fncName].identifier == opts.identifier) throw new Error("This fnc Identifier was already used by " + fncName); 
+            Object.keys(self._commands).forEach(function(fncName){
+               if(self._commands[fncName].identifier == opts.identifier) throw new Error("This fnc Identifier was already used by " + fncName); 
             });
         }
         
-        //Default no timeout
-        if(!opts.timeout) opts.timeout = -1;
+        //Two types of functions - silent (no response) and responsive
+		if(opts.silent){
+			opts.timeout = -1;
+		} else {
+			//Default no timeout
+			if(!opts.timeout) opts.timeout = -1;
+		}
         
         //Save the function information and options to this object
-        self._reactFncs[opts.name] = opts;
+        self._commands[opts.name] = opts;
         
         //Create the invocation function on this object
-        self[opts.name] = function(){ self._executeReactFunction(opts.name, arguments) };
+        self[opts.name] = function(){ self._executeCommand(opts.name, arguments) };
 	
-		return self;
-    }
-	
-	addSilentFnc(opts){
-        var self = this;
-		
-		if(!opts) throw new Error("No options passed to setup a function");
-        if(!opts.name) throw new Error("The 'name' attribute is required for for adding a new function");
-        else if(!/^[a-z0-9]+$/i.test(opts.name)) throw new Error("The name must be compatible with a javascript function - only alphanumericCharacters")
-        else if(opts.name[0] == "_") throw new Error("A function can not start with _, as that is reserved for internal functions for synapse-control");
-        else if(self._reservedNames.indexOf(opts.name) != -1) throw new Error("The name " + opts.name + " is a reserved name and can not be used");
-		
-		//Iterate over the already created silent functions and make sure that none of them have the same identifier
-		if(!opts.identifier) throw new Error("An identifier (an enum that tells the MCU which function you are executing) must be specified");
-        else {
-            Object.keys(self._silentFncs).forEach(function(fncName){
-               if(self._silentFncs[fncName].identifier == opts.identifier) throw new Error("This fnc Identifier was already used by " + fncName); 
-            });
-        }
-		
-		self._silentFncs[opts.name] = opts;
-		
-		self[opts.name] = function(){ self._executeSilentFunction(opts.name, arguments) } ;
-		
 		return self;
     }
 	
@@ -119,14 +98,12 @@ class Synapse {
         var self = this;
                 
         switch(type.toLowerCase()){
-            case "react":
-                return self.addReactFnc(opts);
-            case "silent":
-                return self.addSilentFnc(opts);
+            case "command":
+                return self.addCommand(opts);
             case "update":
                 return self.addUpdateHandler(opts);
             default:
-                throw new Error("Improper type - only 'react', 'silent', and 'update' are allowed");
+                throw new Error("Improper type - only 'command' and 'update' are allowed");
         }
 		
 		return self;
@@ -135,7 +112,7 @@ class Synapse {
 
     //This function is called when a react function is invoked
     //The last argument when invoking a function must always be a cb.
-    _executeReactFunction(fncName, passedArgs){
+    _executeCommand(fncName, passedArgs){
         var self = this;
 		
 		//Convert args to an array
@@ -143,37 +120,49 @@ class Synapse {
 		Object.keys(passedArgs).forEach(function(arg){
 			args.push(passedArgs[arg]);
 		});
-        var cb = args.pop();
-        
-        if(!self._reactFncs[fncName]) return cb("React function " + fncName + " does not exist");
-        //This stuff is saved longterm, so when the response occurs we have a lot of information about it
-        var executingFnc =
-            {
-                type: fncName,
-                uuid: Math.random().toString(36).slice(-6), //uuid sent to mcu
-                issuedOn: new Date(),
-                timeout: null,
-                callback: cb
-            };
+		
+		//If the command is not silent, prepare the response handling and timeouts
+        if(!self._commands[fncName].silent){
+			var cb = args.pop();
 			
-        //Set up the timeout for the react function
-        if(self._reactFncs[fncName].timeout > 0){
-            if(self._reactFncs[fncName].timeoutFnc){
-                executingFnc.timeout = setTimeout(self._waitingResponse[fncName].timeoutFnc, self._reactFncs[fncName].timeout);
-            } else {
-                executingFnc.timeout = setTimeout(function(){
-                    cb("Time out occured");
-                }, self._reactFncs[fncName].timeout);
-            }
-        }        
+			if(!self._commands[fncName]) return cb("Command " + fncName + " does not exist");
+		
+			if(!self._conn.isOpen()) return cb("Serial port connection is closed, so command can not be sent");
         
-        if(!self._conn.isOpen()) return cb("Serial port connection is closed");
-        //Save the info for reference
-        self._waitingResponse[executingFnc.uuid] = executingFnc;
+			//This stuff is saved longterm, so when the response occurs we have a lot of information about it
+			var executingFnc =
+				{
+					name: fncName,
+					uuid: Math.random().toString(36).slice(-6), //uuid sent to mcu
+					issuedOn: new Date(),
+					timeout: null,
+					callback: cb
+				};
+				
+			//Set up the timeout for the react function
+			if(self._commands[fncName].timeout > 0){
+				if(self._commands[fncName].timeoutFnc){
+					executingFnc.timeout = setTimeout(self._waitingResponse[fncName].timeoutFnc, self._commands[fncName].timeout);
+				} else {
+					executingFnc.timeout = setTimeout(function(){
+						cb("Time out occured");
+					}, self._commands[fncName].timeout);
+				}
+			}        
+			
+			//Save the info for reference
+			self._waitingResponse[executingFnc.uuid] = executingFnc;
+			
+		} else{
+			if(!self._commands[fncName]) throw new Error("Command " + fncName + " does not exist");
+		
+			if(!self._conn.isOpen()) throw new Error("Serial port connection is closed, so command can not be sent");
+		}
+        
 
         //Form up all the of the passed arguments into the proper format
         var output = "";
-        output += self._reactFncs[fncName].identifier;
+        output += self._commands[fncName].identifier;
 		output += "," + executingFnc.uuid;
         args.forEach( (arg)=> output += "," + arg );
         output += ";";
@@ -182,7 +171,7 @@ class Synapse {
         self._conn.write(output);
     }
     
-    _handleReactFunctionReply(uuid, msg){
+    _handleCommandResponse(uuid, msg){
         var self = this;
         
         //Clear the timeout if there is one so it won't get called.
@@ -195,7 +184,7 @@ class Synapse {
         //by expecting the returns to be in the same order
         //CHANGE ME! Go by the length of returns and not length of the object?
         incomingData.forEach((value, index)=>{
-            response[ self._reactFncs[ self._waitingResponse[uuid].type ].returns[index] ] = value;
+            response[ self._commands[ self._waitingResponse[uuid].name ].returns[index] ] = value;
         });
         
         //Finally, call that react function cb!
@@ -203,29 +192,6 @@ class Synapse {
         
         //Delete the response waiting
         delete self._waitingResponse[uuid];
-    }
-	
-	_executeSilentFunction(fncName, passedArgs){
-        var self = this;
-		
-        //Convert args to an array
-		var args = [];
-		Object.keys(passedArgs).forEach(function(arg){
-			args.push(passedArgs[arg]);
-		});
-        var cb = args.pop();
-        
-        if(!self._silentFncs[fncName]) return cb("Silent function " + fncName + " does not exist");
-        
-        if(!self._conn.isOpen()) return cb("Serial port connection is closed");
-        
-        //Form up all the of the passed arguments into the proper format
-        var output = "";
-        output += self._silentFncs[fncName].identifier;
-        args.forEach( (arg)=> output += "," + arg );
-        output += ";";
-        //Finaly write out the stuff
-        self._conn.write(output);
     }
 	
 	_handleUpdateMsg(identifier, msg){
@@ -270,7 +236,7 @@ class Synapse {
 			
             var identifier = msg.split(",")[0];
 			
-            if(self._waitingResponse[identifier]) return self._handleReactFunctionReply(identifier, msg);
+            if(self._waitingResponse[identifier]) return self._handleCommandResponse(identifier, msg);
             else if(self._updateHandlers[identifier]) return self._handleUpdateMsg(identifier, msg);
 			
 			new Error("No such update handler found - " + identifier);
