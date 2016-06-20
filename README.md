@@ -119,7 +119,7 @@ Note that you cannot trigger an updateHandler after creation - it can only be tr
 ##Example Usage:
 In this simple example, we're going to set up CmdMessenger on an Arduino (I'm assuming an Uno) - and placing a button on pin 4. The Uno has an LED already on pin 13. We're going to have node blink the LED every second, reporting back once it's done. We're also going to have a console log of when the button switches states.
 
-On our Arduino:
+On your Arduino:
 ```
 #include <CmdMessenger.h>
 
@@ -211,6 +211,10 @@ setInterval(function(){
 }, 1000);
 
 ```
+
+## A robot example
+I've coded up [a quick example](https://github.com/hlfshell/redbot-synapse-example) using a sub $100 robot from Sparkfun using both this and [here](https://github.com/hlfshell/serial-synapse-socket)
+
 
 # Socket Connection
 As a work in progress, I am also developing a socket wrapper which will immediately expose your synapse commands and update handlers to a socket connection. AKA 3 extra lines of code will bring your device online! It can be seen [here](https://github.com/hlfshell/serial-synapse-socket). Here is an example on how easy it is to expose a synapse object to the internet:
