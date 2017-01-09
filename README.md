@@ -144,11 +144,12 @@ void setup()
 
 void setLED(){
 	char* uuid = cmdMessenger.readStringArg();
-	int ledStatus = cmdMessenger.readIntArg();
+	int ledStatus = cmdMessenger.readInt16Arg();
 	
 	digitalWrite(LED_PIN, ledStatus);
 	
 	Serial.print(uuid);
+	Serial.print(",");
 	Serial.println(ledStatus);
 }
 
