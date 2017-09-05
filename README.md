@@ -15,10 +15,10 @@ npm install serial-synapse
 * **Commands** can either be silent (no response generated) or responsive (default, a response will occur to this command, feeding back data or an acknowledgement of command execution)
 * **Update Handlers** have a function triggered when the secondary fires back information with its identifier. A good example would be a sensor detecting collision, or periodic updates of an accelerometer or distance sensor.
 
-##Messaging Protocol
+## Messaging Protocol
 Wherein we discuss the expected communication protocol between master and secondary, where *master* is your node process and *secondary* is your MCU/Arduino/robot/IoT Toaster:
 
-###From master (node) to secondary (MCU):
+### From master (node) to secondary (MCU):
 ```
 identifier,uuid,args,args,args;
 ```
@@ -32,7 +32,7 @@ For example:
 0,dfegjk,25,47,13;
 ```
 
-###From secondary to master:
+### From secondary to master:
 ```
 identifier/uuid,data,data,data
 ```
@@ -41,7 +41,7 @@ identifier/uuid,data,data,data
 * *parsing the end* - Please read on serialport parses its "lines". I use "\r\n" to detect a newline as my parser. *synapse-serial* does not care HOW you denote the differentiation between these lines, but it needs to be set via the serialport instance.
 
 # Commands
-##Responsive commands
+## Responsive commands
 ```
 synapse.addCommand(opts)
 ```
@@ -82,10 +82,10 @@ The callback for responsive commands gets the following arguments:
 ```
 * *rawMSG* - optional, can be ignored - the raw message that triggered this callback function. If you get more data back than returns, it'll be in here.
 
-##Silent Commands
+## Silent Commands
 Silent commands are constructed the same way as responsive commands, but don't have a callback. They have no timeout, and there is no data returned from them. Use this when you don't expect a response. To make a silent command, set *silent* to true.
 
-#Update Handlers
+# Update Handlers
 Update handlers are functions that are triggered when we need to allow the MCU to alert us to a change/value without being polled for it.
 
 An update handler is created by doing
@@ -116,7 +116,7 @@ then: function([data, rawMsg]){
 Note that you cannot trigger an updateHandler after creation - it can only be triggered by the secondary.
 
 
-##Example Usage:
+## Example Usage:
 In this simple example, we're going to set up CmdMessenger on an Arduino (I'm assuming an Uno) - and placing a button on pin 4. The Uno has an LED already on pin 13. We're going to have node blink the LED every second, reporting back once it's done. We're also going to have a console log of when the button switches states.
 
 On your Arduino:
